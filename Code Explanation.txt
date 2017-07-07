@@ -1,0 +1,202 @@
+Code Explanation
+
+===============
+beamprop
+===============
+1. Input beam properties
+2. Input beam definition
+3. Input aerodynamic characteristic
+4. Input flap
+5. Input flow characteristic
+6. Input number of modes retained
+
+===============
+beamconvergence
+===============
+1. Calculate mass and compliance matrix per unit length
+2. Calculate nodal force using BEAMSECTIONCOEFF
+3. Define Kmat
+4. Define Mmat
+5. Calculate eigenvector and eigenvalue
+6. Keep in-plane part of modes
+7. Main output -> Dreal and Vreal
+
+================
+beamsectioncoeff
+================
+1. Define E matrix (EMAT)
+2. Refer to Eqn 4.28 to obtain nodal force
+3. Use nodal force to assembly stiffness matrix
+
+=================
+guyancomputecoeff
+=================
+1. Sort eigenvalue in ascending order and its corresponding eigenvector
+2. Take only the first 'Nmodes' mode
+3. Add rigid body modes related to forward flight motion
+	> Calculate centre of mass
+	> Modify RB modes to conform to axes
+		> Note that rotation produces displacement
+			- Rotation in x axis --> no displacement
+			- Rotation in y axis --> displacement in z direction
+			- Rotation in z axis --> displacement in y direction 
+		> Rewrite the modes into Vreal variable
+	> Obtain velocity displacement of rigid body modes(Phi1). As there is no w for RB, Phi1 = Phi0
+	> Calculate psi1(MPhi1) that will be used to calculate the nonlinear matrix
+	> Process split-nodal Phi0 and Phi1 
+		(make it local by multiplying with rotation matrix -> Phi0s and Phi1s)
+4. Take account normal structure mode shape
+	> Phi0 = Vreal
+	> Phi1 = Omega*Phi0 (Eqn. 5.16)
+	> Calculate MPhi1 = Omega*Mmat*Vreal
+	> NodalForce = -Mmat*Vreal*Dreal (Eqn. 5.9)
+	> Calculate Phi2 
+		> Force Phi2(1:3)
+		> Moment Phi2(4:6)
+	> Process split-nodal Phi0 and Phi1 
+		(make it local by multiplying with rotation matrix -> Phi0s and Phi1s)
+5. Obtain curvatures
+	> Define EMAT
+	> Calculate cphi2(refer to eqn 5.21)
+		> Select the part of Phi0S corresponding to the segment
+		> Multiply by nodelength for collocated cphi2
+	> Put phi2 in Mode.Seg.phi2
+	> Put phi1 in this format too, centrepoint, averaged.
+
+===> obtain phi1, phi2, mphi1, cphi2 (all defined in local)
+
+6. Compute coefficient of nonlinear equation
+	> Nmodes now refer to number of structural modes
+	> Calculate alpha
+		> alpha1 = matrix A1. Size = Nmodes+6 x Nmodes+6(Normal structure + Rigid body mode)
+		> alpha2 = matrix A2. Size = Nmodes x Nmodes(Rigid body mode doesnot have cphi2)
+	> Scale modal coefficient with mscale = sqrt(alpha1), cscale = sqrt(alpha2)
+	> Recompute alpha coupling ==> obtain alpha1new, alpha2new
+	> Calculate L1
+	> Calculate gamma1
+	> Calculate gamma2
+	> Obtain AMat and BMat
+
+7. Compute AE coefficient(coefficient related to flap)
+	> Define global flight direction
+	> Define unsteady aerodynamic model (aeAvector aebvector)
+	> Define aeomega = aebvector/aebvalue
+	> Compute transformation matrix from rb to velocity
+	> Compute rigid body flight speed
+	> Compute matrix related to flap
+		-muone
+		-mutwo
+		-muthree
+	> Compute local aerodynamic orientation matrix (localCpM)
+		> Define local normal(z) direction. Assuming aerofoil completely parallel to flow. 
+		> The local z direction is defined as the cross product between flow direction and beam direction
+		> The local x is then the cross product between y and z
+	> Compute A1CpPhi1
+		> 4 dimension
+		> It is 6x6xNumber of modesxNumber of point
+	> Compute A3CpPhi1
+		> 5 dimension
+		> It is 6x6 x Number of modes x Number of points x Number of flaps
+
+	==> Summary
+	> A1,jk 	 = alpha1new
+	> A2,jk 	 = alpha2new
+	> Lambda1,jk = calculated as beta1(A1_inverse * Lambda1 = WD = beta1 = diag(EValue))
+	> Lambda2,jk = calculated as beta2(A2_inverse * Lambda2 = -WD = beta2 = -diag(EValue))
+	> Gamma1,jkl = gamma1
+	> Gamma2,jkl = gamma2 
+	> H1,jl 	 = muone
+	> H2,jk  	 = mutwo
+	> H3,jl  	 = muthree
+
+===============
+eigsolve
+===============
+1. trimstate. Number of state = 2*neig+6+nae*(neig+6)
+	for Number of node = 20 :
+	trimstate  1-20 : velocity(velocity and angular velocity) mode structural
+	trimstate 21-26 : velocity(velocity and angular velocity) mode rigid body
+	trimstate 27-46 : force moment mode
+	trimstate 47-end: aerodynamics mode
+2. Write back AE states
+3. Reorder triples for optimisation
+	gone   -> goneord
+	gtwo   -> gtwoord
+	mone   -> moneord
+	mtwo   -> mtwoord
+	mthree -> mthreeord
+4. Assembly EigMat in SYSTEMDXEIGCONVERGENCE
+5. Assembly input matrix(SB) in SYSTEMDXIOALL-> mthreeord*deltaflap*q1
+6. Pick RVnum(Number of modes to retain)
+7. Reduce size of EigMat and SB according to RVnum
+
+
+======================
+systemdxeigconvergence
+======================
+
+1. Pick Velocity and Force State (x)
+	> Velocity state(x1)
+	> Force state(x2)
+2. Convert ae states to matrix form for better manipulation 
+3. EigMatLin = BMat = WMatrix in Equation 
+4. Assembly EigMat. Consists of :
+	> (gamma1, mu1, mutwo)q1 and (gamma2)q2
+	> (gamma3)q2
+	> (P1)q1 <-- aerodynamic states
+	> (P2)qa <-- aerodynamic states
+5. Add EigMat = EigMat + EigMatLin
+
+==================
+systemdxioall
+==================
+1. Pick Velocity and Force state(x)
+	> Consider the velocity state(x1)
+2. Size of dFlap
+	> dFlap = zeros(2*neig+6+nae*(neig+6),Nflaps) = Number of state * Number of flap
+3. Populate dFlap <-- x1'*mthreeord*x1
+4. UnitThrust = [0;0;1;0;0;0]
+5. synthrust = zeros(Number of states,1)
+6. dCtrl = [dFlap, synthrust
+
+==================
+dispintegrationvar
+==================
+Input = 
+CurrentState
+ttime
+nInterest
+
+1. 	Initialise dRH(displacement variation) and dCH(curvature variation) storage
+2. 	Cycle through each strain mode -> For k = 1: neig
+3. 	Populte strain mode(Vs, it contains gamma and kappa). And also populate dVs
+		> Vs = Vs + cphi2*Y
+		> dVs = dVs + cphi2*Y
+3. 	Define starting strain and starting curvature of the 1st node
+	(ModalRE, ModalCE, StartR, StartCoord)
+4. 	Find running direction, transform [1;0;0] into global axes
+5. 	Integrate along the beam -> for j = 2:NodeNo
+6. 		Obtain g0, k0, dg0, dk0
+7. 		Obtain tg0, tk0, dgamma, dkappa (transformed into global)
+8.		rkelesvar --> Obtain ModalRE(displacement),ModalCE(curvature),dR(displacement variation),dC(curvature variation) for the next point
+9.	end
+10. At the end we obtain
+	a. ModalCE -> set of curvature
+	b. dCH -> set of curvature variation
+	c. dRH -> set of displacement variation
+
+
+=================
+rkelesvar
+=================
+Question :
+1. Where H0 and H1 come from?
+2. CurrentState = trimstate?
+3. What is the value of ttime? 
+4. 
+	
+
+
+==================
+dispintt
+==================

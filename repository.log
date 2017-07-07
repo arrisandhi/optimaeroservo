@@ -1,0 +1,284 @@
+commit 6612119510fa436e36311495cfdcbdce26eedc8b
+Author: Arri <Arri@Arri-PC>
+Date:   Wed Aug 10 16:09:17 2016 +0100
+
+    Perform optimisation of mass with upper and lowe mass constraint via main_optimisation code
+
+M	MOR.m
+M	beamconvergence_Arri.m
+M	guyanRecomp.m
+M	guyancomp.m
+M	main_MPC_SetPointTrack_LIDAR.m
+M	main_optimCost.m
+M	main_optimisation.m
+M	main_pre.m
+M	main_processing.m
+M	main_processingOPT.m
+
+commit eb24078fe29f1a01da75e4036ab479b1749e0b2b
+Author: Arri <Arri@Arri-PC>
+Date:   Tue Aug 9 17:36:45 2016 +0100
+
+    Add MPC codes(CGP,NGP,LIDAR). Re order main codes. Now trying to change beamconvergence to be compatible with mass distribution
+
+A	MOR.m
+M	assy_trimstate.m
+M	beamconvergence_Arri.m
+D	beamprop_Arri.m
+A	excludeRB.m
+M	guyanRecomp.m
+M	guyancomp.m
+A	main_MPC_SetPointTrack_CGP.m
+A	main_MPC_SetPointTrack_LIDAR.m
+A	main_MPC_SetPointTrack_NGP.m
+A	main_optimCost.m
+M	main_optimisation.m
+D	main_optimisationAsFunc.m
+M	main_pre.m
+M	main_processing.m
+A	main_processingOPT.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioGust.m
+D	try_gusteffect3.m
+
+commit bf26de3fc91634cafb3d5876075d8a6e88c6d3fe
+Author: pas15 <pas15@camws762-038.ic.ac.uk>
+Date:   Tue Aug 2 15:37:07 2016 +0100
+
+    add try_MPCwoG. this code use MPC and DLQR control system design without including gust information to controller. Gust are added to plant system as input disturbance
+
+D	try_gusteffect2.m
+M	try_gusteffect3.m
+D	try_lsim.m
+
+commit f4c5648de859b377d6e58c948a7437633d3ccab6
+Author: pas15 <pas15@libws-sk239.ic.ac.uk>
+Date:   Wed Jul 27 17:01:27 2016 +0100
+
+    Add model order reduction in try_gusteffect3.m
+
+M	systemdxioGust.m
+M	try_gusteffect3.m
+
+commit 58ce3774a57f1efe81fc7b22c3c505c72504e210
+Author: pas15 <pas15@libws-sk239.ic.ac.uk>
+Date:   Wed Jul 27 15:54:20 2016 +0100
+
+    Revise the calculation of SB1qQ1g
+
+M	eigsolve_Arri.m
+M	main_post.m
+M	main_pre.m
+M	main_processing.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioGust.m
+M	try_gusteffect3.m
+
+commit 2875a8e1af2849f1c67fbeb33d802a3ecdf1c99b
+Author: pas15 <pas15@libws-sk223.ic.ac.uk>
+Date:   Mon Jul 25 12:12:56 2016 +0100
+
+    Add gust effect according to the paper(construct SB1q*Q1g)
+
+M	beamconvergence_Arri.m
+M	dispintegrationvar_Arri.m
+M	main_post.m
+M	main_pre.m
+M	main_processing.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioGust.m
+M	systemdxioall_Arri.m
+M	try_gusteffect3.m
+
+commit 8809b317e5ad4bef45155d10743b07dad41151b0
+Author: pas15 <pas15@libws-sk542.ic.ac.uk>
+Date:   Thu Jul 21 12:20:26 2016 +0100
+
+    Revise try_gusteffect3 by adding the terms related to trimFlap.
+
+M	dispintegrationvar_Arri.m
+M	main_post.m
+M	main_processing.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioGust.m
+M	systemdxioall_Arri.m
+M	try_gusteffect2.m
+M	try_gusteffect3.m
+M	try_lsim.m
+
+commit a659641d05d806976602c0b30de2efadf7ca25d0
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 19 06:56:05 2016 +0100
+
+    "Add try_gusteffect3 and modify systemdxiogust. Result moment and velocity in opposite sign. "
+
+A	try_gusteffect3.m
+
+commit 98c1979ed5bed885ff9d499d5594177d698cfcaa
+Author: pas15 <pas15@libws-sk223.ic.ac.uk>
+Date:   Fri Jul 15 09:45:50 2016 +0100
+
+    systemdxioGust added
+
+A	systemdxioGust.m
+
+commit b42baa08a00b15db7c511994494dbf265021f5d6
+Author: pas15 <pas15@libws-sk223.ic.ac.uk>
+Date:   Fri Jul 15 09:45:06 2016 +0100
+
+    Add systemdxio for calculating SBG, SBC. try_gusteffect2 for executing that function. try_lsim to use lsim command for time marching
+
+A	try_gusteffect2.m
+A	try_lsim.m
+
+commit 850a54402a17cce8e5bb779913c85de2352986af
+Author: pas15 <pas15@libws-sk223.ic.ac.uk>
+Date:   Fri Jul 15 09:41:07 2016 +0100
+
+    Gust effect is implemented. There is still ambiguity for calculating x1'*mthreeord*x1. Next, try to do time marching using ode45
+
+M	guyanRecomp.m
+M	guyancomp.m
+D	guyancomputecoeffs_Arri.m
+M	main_optimisation.m
+M	main_post.m
+M	main_pre.m
+M	main_processing.m
+M	systemdxae_Arri.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioall_Arri.m
+
+commit 778163017386286897700be06ccc0a32413e1295
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 23:09:53 2016 +0100
+
+    Add code try_gusteffect that account gust effect to dynamic matrix and input matrix
+
+M	assy_guststate.m
+M	main_optimisation.m
+M	main_processing.m
+M	systemdxeigconvergence_Arri.m
+
+commit 589a3a596cd501e347b4a38197c6bfcb931e006d
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 17:29:05 2016 +0100
+
+    Change beamprop to main_pre. Add main_processing, main _post, main_optimisation, main_optimisationAsFunc. Add functions for post processing
+
+A	guyancomp.m
+A	main_optimisation.m
+A	main_optimisationAsFunc.m
+A	main_post.m
+A	main_pre.m
+A	main_processing.m
+A	march_stateGust.m
+A	march_stateevec.m
+A	plot3Dwing.m
+A	plotdisprot.m
+A	plotmodeshape.m
+A	plotpoleEigMat.m
+A	processing_post.m
+A	systemdxae_Arri.m
+
+commit 92640001a298cfad3e8a387cee297e1f76e1a9b5
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 17:24:14 2016 +0100
+
+    Change beamprop to main_pre. Add main_processing, main _post, main_optimisation, main_optimisationAsFunc. Add functions for post processing
+
+M	EigMatIdentification.m
+D	RA.mpg
+M	RecomputeOpt_Arri.m
+M	assy_guststate.m
+M	assy_trimstate.m
+M	beamprop_Arri.m
+M	eigsolve_Arri.m
+M	eigsolvesimple_Arri.m
+D	filegit.m
+M	guyanRecomp.m
+M	guyancomputecoeffs_Arri.m
+M	optim.m
+M	optim_temp.m
+M	optimisation.m
+D	plotmodeshapeZ.m
+M	systemdxeigconvergence_Arri.m
+M	systemdxioall_Arri.m
+
+commit ffbe5a5db45b09e08bc88070290e9e2e4427f624
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 17:20:38 2016 +0100
+
+    "Rename function RecomputeOpt"
+
+A	guyanRecomp.m
+
+commit 3e15590d7507656c733a7754f7c8c2787bbec376
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 17:19:24 2016 +0100
+
+    "Function to assembly state according to gust effect
+    "
+
+A	assy_guststate.m
+
+commit 45bd5d1adf8d5b0bf4e3f3c62d455262223dfeef
+Author: Arri <pas15@ic.ac.uk>
+Date:   Tue Jul 12 17:18:28 2016 +0100
+
+    "Move trimstate assembly from eigsolve function to be new function "
+
+A	assy_trimstate.m
+
+commit 60a8eeaf0c5afc2b54ce021fef6f5dd3e1368632
+Author: Arri <pas15@ic.ac.uk>
+Date:   Sun Jul 3 01:45:28 2016 +0100
+
+    Add filegit(file untuk test git)
+
+A	filegit.m
+
+commit d2604f535cd3bbb45f5c365853da79fee383f6f0
+Author: Arri <pas15@ic.ac.uk>
+Date:   Sun Jul 3 01:34:39 2016 +0100
+
+    Test commit
+
+M	A1funCL.m
+
+commit 89612f3b3736033bf0f9ed8924e43b59c122e3ad
+Author: Arri <pas15@ic.ac.uk>
+Date:   Sun Jul 3 01:13:01 2016 +0100
+
+    Initial commit
+
+A	A1funCL.m
+A	A2fun_Arri.m
+A	A3funD.m
+A	EigMatIdentification.m
+A	L1fun.m
+A	L2fun.m
+A	Question.txt
+A	RA.mpg
+A	RecomputeOpt_Arri.m
+A	Rot6.m
+A	beamconvergence_Arri.m
+A	beamprop_Arri.m
+A	beamsectioncoeff.m
+A	beamsectioncoeff_Arri.m
+A	dispintegrationvar_Arri.m
+A	dispintt.m
+A	eigsolve_Arri.m
+A	eigsolvesimple_Arri.m
+A	guyancomputecoeffs_Arri.m
+A	optim.m
+A	optim_temp.m
+A	optimisation.m
+A	plotmodeshapeZ.m
+A	rkelesvar.m
+A	sys.m
+A	syscall.m
+A	systemdxeigconvergence_Arri.m
+A	systemdxioall_Arri.m
+A	tilde.m
+A	tp_dispintegrationvar.mat
+A	tp_optimisation.mat
